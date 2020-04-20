@@ -1,6 +1,6 @@
 #ifndef SYSTEM_PARSER_H
 #define SYSTEM_PARSER_H
-
+#include<vector>
 #include <fstream>
 #include <regex>
 #include <string>
@@ -15,7 +15,7 @@ const std::string kStatFilename{"/stat"};
 const std::string kUptimeFilename{"/uptime"};
 const std::string kMeminfoFilename{"/meminfo"};
 const std::string kVersionFilename{"/version"};
-const std::string kOSPath{"/etc/os-release"};
+const std::string kOSPath{"/etc/os-release"}; 
 const std::string kPasswordPath{"/etc/passwd"};
 
 // System
@@ -26,7 +26,8 @@ int TotalProcesses();
 int RunningProcesses();
 std::string OperatingSystem();
 std::string Kernel();
-
+std::vector< std::string>  FetchValue(std::string file_location, int line_number,bool Grablable=false);
+//vector< std::string> FetchValue(string file_location, int line_number);
 // CPU
 enum CPUStates {
   kUser_ = 0,
@@ -45,7 +46,6 @@ long Jiffies();
 long ActiveJiffies();
 long ActiveJiffies(int pid);
 long IdleJiffies();
-
 // Processes
 std::string Command(int pid);
 std::string Ram(int pid);
