@@ -120,7 +120,7 @@ long LinuxParser::UpTime()
 
 uptime_system=  FetchValue(kProcDirectory + kUptimeFilename,0,true).at(0);
 long upTime = stof(uptime_system);
-return 10000;//upTime/1000;
+return upTime;
 }
 
 // TODO: Read and return the number of jiffies for the system
