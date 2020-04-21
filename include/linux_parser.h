@@ -27,6 +27,7 @@ int RunningProcesses();
 std::string OperatingSystem();
 std::string Kernel();
 std::vector< std::string>  FetchValue(std::string file_location, int line_number,bool Grablable=false);
+std::vector<std::string>FetchValue(std::string file_location,std::string lable123, bool Grablable);
 //vector< std::string> FetchValue(string file_location, int line_number);
 // CPU
 enum CPUStates {
