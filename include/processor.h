@@ -8,6 +8,8 @@ class Processor {
   private:
 float idle;
 float active;
+float prev_idle=0;
+float prev_active=0;
 };
 
 #endif

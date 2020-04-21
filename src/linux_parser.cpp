@@ -12,37 +12,58 @@ using std::string;
 using std::to_string;
 using std::vector;
 // get value from lines as a function
-std::vector< std::string>  LinuxParser::FetchValue(string file_location, int line_number, bool Grablable)
-{
-std::ifstream stream(file_location);
-string line;
-vector<string> data1;
-string junk, data;
-if (stream.is_open()) {
-  for (int i = 0; i <= line_number; i++)
-{
-   
-    std::getline(stream, line);
-    if(line_number==i)
+std::vector<std::string> LinuxParser::FetchValue(string file_location,
+                                                 int line_number,
+                                                 bool Grablable) {
+  std::ifstream stream(file_location);
+  string line;
+  vector<string> data1;
+  string junk, data;
+  if (stream.is_open()) {
+    for (int i = 0; i <= line_number; i++) {
+      std::getline(stream, line);
+      if (line_number == i) {
+        std::istringstream memline1(line);
+        memline1 >> junk >> data;
+        if (Grablable == true) data1.emplace_back(junk);
+        data1.emplace_back(data);
+        while (memline1 >> data) {
+          data1.emplace_back(data);
+        }
+        // std::cout<<data;
+      }
+    }
+  }
+
+  return data1;
+}
+std::vector<string>LinuxParser::FetchValue(string file_location,string lable, bool Grablable) {
+    std::ifstream stream(file_location);
+  string line;
+  vector<string> data1;
+  string labledata, data;
+  if (stream.is_open()) {
+    while (std::getline(stream, line)) 
     {
       std::istringstream memline1(line);
-      memline1 >> junk >> data; 
-      if (Grablable==true)
-            data1.emplace_back(junk);
-      data1.emplace_back(data);
-     while(memline1>>data)
-{
-    data1.emplace_back(data);
-}
-     // std::cout<<data;
-   }
+      memline1 >> labledata >> data;
+     // cout<<"\nlable data" <<labledata;
+      if ((labledata.find(lable)+1)>0 ) {
+        //  cout<<"lable match \n\n";
+        if (Grablable == true) data1.emplace_back(labledata);
+        data1.emplace_back(data);
+        while (memline1 >> data) {
+          data1.emplace_back(data);
+        }
+          return data1;
+      }
 
+      // std::cout<<data;
+    }
+    return (data1={"data"});
+  }    
 }
 
-}
-
-return data1;
-}
 // DONE: An example of how to read data from the filesystem
 string LinuxParser::OperatingSystem() {
   string line;
@@ -107,20 +128,22 @@ float LinuxParser::MemoryUtilization() {
   // get the variable you want to grab
   // string junk,MemTotal,MemFree;// junk is just ignroable data
   // isolate the values, prototype : MemTotal:       16275688 kB
-  float MemTotal = stof((FetchValue(kProcDirectory + kMeminfoFilename, 0).at(0)));
+  float MemTotal =
+      stof((FetchValue(kProcDirectory + kMeminfoFilename, 0).at(0)));
   // isolate the values, prototype :MemFree:         8940436 kB
-  float MemFree = stof((LinuxParser::FetchValue(kProcDirectory + kMeminfoFilename, 1)).at(0));
+  float MemFree = stof(
+      (LinuxParser::FetchValue(kProcDirectory + kMeminfoFilename, 1)).at(0));
   mem_util = (MemTotal - MemFree) / MemTotal;
   return mem_util;
 }
 
 // TODO: Read and return the system uptime
-long LinuxParser::UpTime()
-{string uptime_system;
+long LinuxParser::UpTime() {
+  string uptime_system;
 
-uptime_system=  FetchValue(kProcDirectory + kUptimeFilename,0,true).at(0);
-long upTime = stof(uptime_system);
-return 10000;//upTime/1000;
+  uptime_system = FetchValue(kProcDirectory + kUptimeFilename, 0, true).at(0);
+  long upTime = stof(uptime_system);
+  return upTime;
 }
 
 // TODO: Read and return the number of jiffies for the system
@@ -141,10 +164,10 @@ long LinuxParser::IdleJiffies() { return 0; }
 //    return LinuxParser::FetchValue("/proc/stat",0) ;}
 
 // TODO: Read and return the total number of processes
-int LinuxParser::TotalProcesses() { return 0; }
+int LinuxParser::TotalProcesses() { return std::stoi(FetchValue("/proc/stat","processes",0).at(0)) ; }
 
 // TODO: Read and return the number of running processes
-int LinuxParser::RunningProcesses() { return 0; }
+int LinuxParser::RunningProcesses() {return stoi(FetchValue("/proc/stat","procs_running",0).at(0)); }
 
 // TODO: Read and return the command associated with a process
 // REMOVE: [[maybe_unused]] once you define the function
