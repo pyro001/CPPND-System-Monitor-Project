@@ -209,7 +209,7 @@ return(FetchValue(kProcDirectory + to_string(pid) + kStatusFilename,"Uid:",0).at
 
 // TODO: Read and return the user associated with a process
 // REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::User(int pid [[maybe_unused]])
+string LinuxParser::User(int pid )
  { //step1. get uid
  const string uid=LinuxParser::Uid(pid);
  //step 2 
@@ -231,4 +231,16 @@ string LinuxParser::User(int pid [[maybe_unused]])
 
 // TODO: Read and return the uptime of a process
 // REMOVE: [[maybe_unused]] once you define the function
-long LinuxParser::UpTime(int pid [[maybe_unused]]) { return 0; }
+long LinuxParser::UpTime(int pid )
+ {
+   vector<string> vec=   LinuxParser::FetchValue(kProcDirectory + to_string(pid) + kStatFilename,0,1);
+    long starttime = stol(vec.at(21))/ sysconf(_SC_CLK_TCK);
+return starttime;
+ }
+ float LinuxParser::precessorutil(int pid)
+ {
+   vector<string> vec=   LinuxParser::FetchValue(kProcDirectory + to_string(pid) + kStatFilename,0,1);
+   long seconds =LinuxParser::UpTime()-LinuxParser::UpTime(pid);
+   float totaltime = (stof(vec.at(utimeloc))+stof(vec.at(cutimeloc))+stof(vec.at(cstimeloc)))/sysconf(_SC_CLK_TCK);
+ return (100*totaltime/(seconds));
+ }
