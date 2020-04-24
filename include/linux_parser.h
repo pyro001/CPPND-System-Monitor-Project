@@ -8,7 +8,7 @@
 #define stimeloc 14
 #define cutimeloc 15
 #define cstimeloc 16
-
+#define starttimeloc 21
 /*#14 utime - CPU time spent in user code, measured in clock ticks
 #15 stime - CPU time spent in kernel code, measured in clock ticks
 #16 cutime - Waited-for children's CPU time spent in user code (in clock ticks)
@@ -51,7 +51,7 @@ enum CPUStates {
   kGuest_,
   kGuestNice_
 };
-std::vector<std::string> CpuUtilization();
+std::vector<std::string> CpuUtilization() ;
 // long Jiffies();
 // long ActiveJiffies();
 // long IdleJiffies();

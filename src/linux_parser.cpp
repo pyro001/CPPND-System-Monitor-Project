@@ -24,10 +24,15 @@ std::vector<std::string> LinuxParser::FetchValue(string file_location,
       std::getline(stream, line);
       if (line_number == i) 
       {
-        std::replace(line.begin(), line.end(), ':', ' ');
+        std::remove(line.begin(), line.end(), ':');
         // std::replace(line.begin(), line.end(), ' ', '_');
-        std::replace(line.begin(), line.end(), '=', ' ');
-        std::replace(line.begin(), line.end(), '"', ' ');
+        std::remove(line.begin(), line.end(), '=');
+        std::remove(line.begin(), line.end(), '"');
+
+        std::remove(line.begin(), line.end(), '(');
+        std::remove(line.begin(), line.end(), ')');
+        std::remove(line.begin(), line.end(), '-');
+
         std::istringstream memline1(line);
         memline1 >> junk >> data;
         if (Grablable == true) data1.emplace_back(junk);
@@ -51,10 +56,14 @@ std::vector<string>LinuxParser::FetchValue(string file_location,string lable, bo
     while (std::getline(stream, line)) 
     { 
 
-      std::replace(line.begin(), line.end(), ':', ' ');
-      // std::replace(line.begin(), line.end(), ' ', '_');
-      std::replace(line.begin(), line.end(), '=', ' ');
-      std::replace(line.begin(), line.end(), '"', ' ');
+      std::remove(line.begin(), line.end(), ':');
+        // std::replace(line.begin(), line.end(), ' ', '_');
+        std::remove(line.begin(), line.end(), '=');
+        std::remove(line.begin(), line.end(), '"');
+
+        std::remove(line.begin(), line.end(), '(');
+        std::remove(line.begin(), line.end(), ')');
+        std::remove(line.begin(), line.end(), '-');
       std::istringstream memline1(line);
       memline1 >> labledata >> data;
      // cout<<"\nlable data" <<labledata;
@@ -198,17 +207,25 @@ string LinuxParser::Command(int pid ) {
 // TODO: Read and return the memory used by a process
 // REMOVE: [[maybe_unused]] once you define the function
 string LinuxParser::Ram(int pid ) { 
-  float mb=stof(FetchValue(kProcDirectory + to_string(pid) + kStatusFilename,"VmSize:",0).at(0))/1024;
-  return to_string(mb); }
+  try
+  {
+      float mb=stof(FetchValue(kProcDirectory + to_string(pid) + kStatusFilename,"VmSize:",0).at(0))/1024;
+      return to_string(mb);
+  }
+  catch(...)
+  {return 0;
+    
+  }
+  
+   }
 
 // TODO: Read and return the user ID associated with a process
-// REMOVE: [[maybe_unused]] once you define the function
+
 string LinuxParser::Uid(int pid) { 
 return(FetchValue(kProcDirectory + to_string(pid) + kStatusFilename,"Uid:",0).at(0));
    }
 
 // TODO: Read and return the user associated with a process
-// REMOVE: [[maybe_unused]] once you define the function
 string LinuxParser::User(int pid )
  { //step1. get uid
  const string uid=LinuxParser::Uid(pid);
