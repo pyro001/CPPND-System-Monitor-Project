@@ -22,7 +22,17 @@ std::vector<std::string> LinuxParser::FetchValue(string file_location,
   if (stream.is_open()) {
     for (int i = 0; i <= line_number; i++) {
       std::getline(stream, line);
-      if (line_number == i) {
+      if (line_number == i) 
+      {
+        std::remove(line.begin(), line.end(), ':');
+        // std::replace(line.begin(), line.end(), ' ', '_');
+        std::remove(line.begin(), line.end(), '=');
+        std::remove(line.begin(), line.end(), '"');
+
+        std::remove(line.begin(), line.end(), '(');
+        std::remove(line.begin(), line.end(), ')');
+        std::remove(line.begin(), line.end(), '-');
+
         std::istringstream memline1(line);
         memline1 >> junk >> data;
         if (Grablable == true) data1.emplace_back(junk);
@@ -44,7 +54,15 @@ std::vector<string>LinuxParser::FetchValue(string file_location,string lable, bo
   string labledata, data;
   if (stream.is_open()) {
     while (std::getline(stream, line)) 
-    {
+    { 
+
+        // std::replace(line.begin(), line.end(), ' ', '_');
+        std::remove(line.begin(), line.end(), '=');
+        std::remove(line.begin(), line.end(), '"');
+
+        std::remove(line.begin(), line.end(), '(');
+        std::remove(line.begin(), line.end(), ')');
+        std::remove(line.begin(), line.end(), '-');
       std::istringstream memline1(line);
       memline1 >> labledata >> data;
      // cout<<"\nlable data" <<labledata;
@@ -55,13 +73,14 @@ std::vector<string>LinuxParser::FetchValue(string file_location,string lable, bo
         while (memline1 >> data) {
           data1.emplace_back(data);
         }
-          return data1;
+         // return data1;
       }
 
       // std::cout<<data;
     }
-    return (data1={"data"});
-  }    
+    // (data1={"data"});
+  } 
+  return data1;   
 }
 
 // DONE: An example of how to read data from the filesystem
@@ -125,8 +144,7 @@ float LinuxParser::MemoryUtilization() {
   // grab the line 1 in the /proc/meminfo
   string line;
   float mem_util;
-  // get the variable you want to grab
-  // string junk,MemTotal,MemFree;// junk is just ignroable data
+  
   // isolate the values, prototype : MemTotal:       16275688 kB
   float MemTotal =
       stof((FetchValue(kProcDirectory + kMeminfoFilename, 0).at(0)));
@@ -142,26 +160,29 @@ long LinuxParser::UpTime() {
   string uptime_system;
 
   uptime_system = FetchValue(kProcDirectory + kUptimeFilename, 0, true).at(0);
-  long upTime = stof(uptime_system);
+  long upTime = stol(uptime_system);
   return upTime;
 }
-
+//------ DEPRECATED FUNCTIONALITES: THESE ARE DONE IN PROCESSOR.CPP NOW-----
 // TODO: Read and return the number of jiffies for the system
-long LinuxParser::Jiffies() { return 0; }
+// long LinuxParser::Jiffies() { return 0; }
 
-// TODO: Read and return the number of active jiffies for a PID
-// REMOVE: [[maybe_unused]] once you define the function
-long LinuxParser::ActiveJiffies(int pid [[maybe_unused]]) { return 0; }
+// 
+// // TODO: Read and return the number of active jiffies for the system
+// long LinuxParser::ActiveJiffies() { return 0; }
 
-// TODO: Read and return the number of active jiffies for the system
-long LinuxParser::ActiveJiffies() { return 0; }
-
-// TODO: Read and return the number of idle jiffies for the system
-long LinuxParser::IdleJiffies() { return 0; }
+// // TODO: Read and return the number of idle jiffies for the system
+// long LinuxParser::IdleJiffies() { return 0; }
 
 // TODO: Read and return CPU utilization
 // vector<string> LinuxParser::CpuUtilization() {
 //    return LinuxParser::FetchValue("/proc/stat",0) ;}
+//-----------deprecated functioNALITIES END------
+
+// // TODO: Read and return the number of active jiffies for a PID
+// // REMOVE: [[maybe_unused]] once you define the function
+
+long LinuxParser::ActiveJiffies(int pid [[maybe_unused]]) { return 0; }
 
 // TODO: Read and return the total number of processes
 int LinuxParser::TotalProcesses() { return std::stoi(FetchValue("/proc/stat","processes",0).at(0)) ; }
@@ -171,20 +192,67 @@ int LinuxParser::RunningProcesses() {return stoi(FetchValue("/proc/stat","procs_
 
 // TODO: Read and return the command associated with a process
 // REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::Command(int pid [[maybe_unused]]) { return string(); }
+string LinuxParser::Command(int pid ) {
+  //vector<string> vec=FetchValue(kProcDirectory + to_string(pid) + kCmdlineFilename,0,1);
+   std::ifstream stream(kProcDirectory + to_string(pid) + kCmdlineFilename);
+  string line;
+  vector<string> data1;
+  string junk, data;
+  if (stream.is_open()) {
+  std::getline(stream, line);
+     }
+    return line; }
 
 // TODO: Read and return the memory used by a process
 // REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::Ram(int pid [[maybe_unused]]) { return string(); }
+string LinuxParser::Ram(int pid ) { 
+   try
+  {
+       long mb=stol(FetchValue(kProcDirectory + to_string(pid) + kStatusFilename,"VmSize:",0).at(0))/1024;
+       return to_string(mb);
+ 
+  }
+  catch(...)
+  {return 0;
+    
+  }
+ 
+   }
 
 // TODO: Read and return the user ID associated with a process
-// REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::Uid(int pid [[maybe_unused]]) { return string(); }
 
+string LinuxParser::Uid(int pid)
+{
+  auto input = FetchValue("/proc/" + to_string(pid) + "/status", "Uid:", 1);
+
+  return input.at(1);
+}
 // TODO: Read and return the user associated with a process
-// REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::User(int pid [[maybe_unused]]) { return string(); }
+string LinuxParser::User(int pid)
+{
+  //step1. get uid
+  string user_ID = Uid(pid);
+  string user;
 
+  vector<string> vec = FetchValue("/etc/passwd", (user_ID), 1);
+  user= vec.at(0);
+//std::copy(vec.begin(),vec.end(),std::experimental::make_ostream_joiner(std::cout,",\t"));
+//auto loc=std::find(vec.begin(),vec.end(),user_ID)+1;
+user = user.substr(0,user.find(':'));
+return user;
+}
 // TODO: Read and return the uptime of a process
 // REMOVE: [[maybe_unused]] once you define the function
-long LinuxParser::UpTime(int pid [[maybe_unused]]) { return 0; }
+long LinuxParser::UpTime(int pid )
+ {
+   vector<string> vec=   LinuxParser::FetchValue(kProcDirectory + to_string(pid) + kStatFilename,0,1);
+    long starttime = stol(vec.at(21))/ sysconf(_SC_CLK_TCK);
+return starttime;
+ }
+ float LinuxParser::precessorutil(int pid)
+ {
+   vector<string> vec=   LinuxParser::FetchValue(kProcDirectory + to_string(pid) + kStatFilename,0,1);
+   long seconds =LinuxParser::UpTime()-LinuxParser::UpTime(pid);
+   float totaltime = (stof(vec.at(utimeloc))+stof(vec.at(cutimeloc))+stof(vec.at(cstimeloc)))/sysconf(_SC_CLK_TCK);
+ return (100*totaltime/(seconds));
+ }
