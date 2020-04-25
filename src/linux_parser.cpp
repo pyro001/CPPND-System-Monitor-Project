@@ -56,7 +56,6 @@ std::vector<string>LinuxParser::FetchValue(string file_location,string lable, bo
     while (std::getline(stream, line)) 
     { 
 
-      std::remove(line.begin(), line.end(), ':');
         // std::replace(line.begin(), line.end(), ' ', '_');
         std::remove(line.begin(), line.end(), '=');
         std::remove(line.begin(), line.end(), '"');
@@ -207,45 +206,41 @@ string LinuxParser::Command(int pid ) {
 // TODO: Read and return the memory used by a process
 // REMOVE: [[maybe_unused]] once you define the function
 string LinuxParser::Ram(int pid ) { 
-  try
+   try
   {
-      float mb=stof(FetchValue(kProcDirectory + to_string(pid) + kStatusFilename,"VmSize:",0).at(0))/1024;
-      return to_string(mb);
+       long mb=stol(FetchValue(kProcDirectory + to_string(pid) + kStatusFilename,"VmSize:",0).at(0))/1024;
+       return to_string(mb);
+ 
   }
   catch(...)
   {return 0;
     
   }
-  
+ 
    }
 
 // TODO: Read and return the user ID associated with a process
 
-string LinuxParser::Uid(int pid) { 
-return(FetchValue(kProcDirectory + to_string(pid) + kStatusFilename,"Uid:",0).at(0));
-   }
+string LinuxParser::Uid(int pid)
+{
+  auto input = FetchValue("/proc/" + to_string(pid) + "/status", "Uid:", 1);
 
+  return input.at(1);
+}
 // TODO: Read and return the user associated with a process
-string LinuxParser::User(int pid )
- { //step1. get uid
- const string uid=LinuxParser::Uid(pid);
- //step 2 
- int i =0;
- bool breakloop=false;
- string user;
- while (!breakloop)
- {i++;
- vector<string> vec=LinuxParser::FetchValue(kPasswordPath,i,1);
- if (vec.at(2).find(uid)+1>0)
-{ user= vec.at(0);
- breakloop=true;
- }  //user found!
-   /* code */
- }
- 
+string LinuxParser::User(int pid)
+{
+  //step1. get uid
+  string user_ID = Uid(pid);
+  string user;
 
-   return user; }
-
+  vector<string> vec = FetchValue("/etc/passwd", (user_ID), 1);
+  user= vec.at(0);
+//std::copy(vec.begin(),vec.end(),std::experimental::make_ostream_joiner(std::cout,",\t"));
+//auto loc=std::find(vec.begin(),vec.end(),user_ID)+1;
+user = user.substr(0,user.find(':'));
+return user;
+}
 // TODO: Read and return the uptime of a process
 // REMOVE: [[maybe_unused]] once you define the function
 long LinuxParser::UpTime(int pid )

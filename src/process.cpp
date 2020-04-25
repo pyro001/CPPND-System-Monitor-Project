@@ -14,7 +14,12 @@ Process::Process(int pid) {pid_=pid;}
 int Process::Pid() { return pid_; }
 
 // TODO: Return this process's CPU utilization
-float Process::CpuUtilization()const {     std::string line;
+float Process::CpuUtilization()const {   
+    try
+    {
+        /* code */
+    
+    std::string line;
     float cpu_usage;
 
   long upTime = LinuxParser::UpTime();
@@ -40,7 +45,13 @@ float Process::CpuUtilization()const {     std::string line;
             cpu_usage = ((((utime + stime+ cutime + cstime)) / sysconf(_SC_CLK_TCK)) / (upTime - starttime / sysconf(_SC_CLK_TCK)));
         
     
-    return cpu_usage; }
+    return cpu_usage; 
+    
+    }
+    catch(...)
+    {
+        return 10000.0;
+    }}
 
 // TODO: Return the command that generated this process
 string Process::Command() { 
@@ -96,4 +107,4 @@ long int Process::UpTime() {
 
 // TODO: Overload the "less than" comparison operator for Process objects
 // REMOVE: [[maybe_unused]] once you define the function
-bool Process::operator<(Process const& a) const { return (this->CpuUtilization()<a.CpuUtilization()); }
+bool Process::operator<(Process const& a) const { return (this->CpuUtilization()>a.CpuUtilization()); }
